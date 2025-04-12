@@ -105,4 +105,18 @@ public class EmployeeController {
 
     }
 
+    /**
+     * 启用禁用用户
+     * @param status
+     * @param id
+     * @return
+     */
+    @PostMapping("/status/{status}")
+    @ApiOperation("启用禁用用户")
+    public Result updateStatus(@PathVariable Integer status, long id) {
+        log.info("禁用或启用用户ID：{},状态：{}", id, status);
+        employeeService.updateStatus(status,id);
+        return Result.success();
+    }
+
 }
