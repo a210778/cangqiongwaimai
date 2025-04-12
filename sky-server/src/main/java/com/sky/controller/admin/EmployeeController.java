@@ -38,6 +38,7 @@ public class EmployeeController {
      * @return
      */
     @PostMapping("/login")
+    //VO后端传前端。DTO前端传后端
     public Result<EmployeeLoginVO> login(@RequestBody EmployeeLoginDTO employeeLoginDTO) {
         log.info("员工登录：{}", employeeLoginDTO);
 
