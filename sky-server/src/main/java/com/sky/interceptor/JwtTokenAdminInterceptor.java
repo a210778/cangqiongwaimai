@@ -27,7 +27,7 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
     private JwtProperties jwtProperties;
 
     /**
-     * 校验jwt
+     * 校验jwt  preHandle()	登录校验、权限判断、参数预处理
      *
      * @param request
      * @param response

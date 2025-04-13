@@ -5,7 +5,6 @@ import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
 import com.sky.entity.Employee;
 import com.sky.result.PageResult;
-import org.apache.poi.ss.formula.functions.T;
 
 public interface EmployeeService {
 
@@ -25,4 +24,8 @@ public interface EmployeeService {
     PageResult pageQuery(EmployeePageQueryDTO employeePageQueryDTO);
 
     void updateStatus(Integer status, long id);
+
+    Employee getById(Long id);
+
+    void update(EmployeeDTO employee);
 }
