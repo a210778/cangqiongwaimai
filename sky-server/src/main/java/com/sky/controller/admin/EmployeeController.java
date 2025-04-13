@@ -108,7 +108,7 @@ public class EmployeeController {
     /**
      * 启用禁用用户
      * @param status
-     * @param id
+     * @param id 是通过查询参数传递的，这会被 Spring 自动绑定到方法参数 long id。
      * @return
      */
     @PostMapping("/status/{status}")
