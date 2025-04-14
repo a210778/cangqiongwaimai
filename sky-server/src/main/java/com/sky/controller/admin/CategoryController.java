@@ -1,13 +1,8 @@
 package com.sky.controller.admin;
 
-import com.sky.constant.MessageConstant;
 import com.sky.dto.CategoryDTO;
 import com.sky.dto.CategoryPageQueryDTO;
 import com.sky.entity.Category;
-import com.sky.exception.DeletionNotAllowedException;
-import com.sky.mapper.CategoryMapper;
-import com.sky.mapper.DishMapper;
-import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.CategoryService;
@@ -16,11 +11,14 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
 @Api(tags = "分类管理")
 @Slf4j
 @RestController
 @RequestMapping("/admin/category")
-public class CategoryControllor {
+public class CategoryController {
     @Autowired
     private CategoryService categoryService;
     /**
@@ -76,6 +74,13 @@ public class CategoryControllor {
         log.info("删除分类");
         categoryService.deleteCategory(id);
         return Result.success();
+    }
+    @GetMapping("/list")
+    @ApiOperation("根据类型查询")
+    public Result<List<Category>> listCategory(Integer type) {
+        log.info("根据类型查询");
+       List<Category> list =  categoryService.list(type);
+        return Result.success(list);
     }
 
 }

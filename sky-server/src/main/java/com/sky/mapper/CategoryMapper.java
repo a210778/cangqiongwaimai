@@ -8,6 +8,8 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 @Mapper
 public interface CategoryMapper {
     @AutoFill(value = OperationType.UPDATE)
@@ -20,4 +22,6 @@ public interface CategoryMapper {
     void addCategory(Category category);
     @Delete("delete from category where id = #{id}")
     void deleteCategory(long id);
+
+    List<Category> list(Integer type);
 }

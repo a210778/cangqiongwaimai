@@ -54,8 +54,8 @@ public class AutoFillAspect {
     log.info("开始进行公共填充...");
     //1.获取拦截器方法中的实体
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-       AutoFill autoFill = signature.getMethod().getAnnotation(AutoFill.class);
-       OperationType operationType = autoFill.value();
+        AutoFill autoFill = signature.getMethod().getAnnotation(AutoFill.class);
+        OperationType operationType = autoFill.value();
     //2.准备赋值
         Object[] args = joinPoint.getArgs();
         if (args.length == 0|| args == null) {

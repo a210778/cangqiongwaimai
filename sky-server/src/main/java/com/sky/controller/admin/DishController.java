@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequestMapping("/admin/dish")
-public class DishControllor {
+public class DishController {
 
 
 }
