@@ -76,5 +76,13 @@ public class DishController {
       return Result.success(list);
     }
 
+    @PostMapping("/status/{status}")
+    @ApiOperation("修改状态")
+    public Result statusById(@PathVariable Integer status,Long id) {
+        log.info("修改状态");
+        dishService.statusById(status,id);
+
+        return Result.success();
+    }
 
 }

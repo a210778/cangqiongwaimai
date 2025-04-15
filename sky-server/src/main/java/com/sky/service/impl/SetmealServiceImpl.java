@@ -11,6 +11,7 @@ import com.sky.mapper.SetmealDishMapper;
 import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageResult;
 import com.sky.service.SetmealService;
+import com.sky.vo.SetmealVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,7 @@ public class SetmealServiceImpl implements SetmealService {
     @Override
     public PageResult pageQuery(SetmealPageQueryDTO setmealPageQueryDTO) {
         PageHelper.startPage(setmealPageQueryDTO.getPage(),setmealPageQueryDTO.getPageSize());
-        Page<Setmeal> page =setmealMapper.pageQuery(setmealPageQueryDTO);
+        Page<SetmealVO> page =setmealMapper.pageQuery(setmealPageQueryDTO);
         return new PageResult(page.getTotal(),page.getResult());
     }
 
@@ -42,6 +43,40 @@ public class SetmealServiceImpl implements SetmealService {
         setmeal.setStatus(StatusConstant.DISABLE);
         setmealMapper.save(setmeal);
         List<SetmealDish> list = setmealDTO.getSetmealDishes();
+        list.forEach(setmealDish -> {setmealDish.setSetmealId(setmeal.getId());});
         setmealDishMapper.insert(list);
+    }
+
+    @Override
+    public SetmealVO getById(Long id) {
+        log.info("get setmeal{}",id);
+        Setmeal setmeal = setmealMapper.getById(id);
+        List<SetmealDish> setmealDish = setmealDishMapper.getSetmealDishId(id);
+        SetmealVO setmealVO = new SetmealVO();
+        BeanUtils.copyProperties(setmeal,setmealVO);
+        setmealVO.setSetmealDishes(setmealDish);
+//
+        return setmealVO;
+    }
+
+    @Override
+    public void updateStatus(Integer status, Long id) {
+        Setmeal setmeal = setmealMapper.getById(id);
+        setmeal.setStatus(status);
+        setmealMapper.update(setmeal);
+    }
+
+    @Override
+    public void update(SetmealDTO setmealDTO) {
+        Setmeal setmeal = new Setmeal();
+        BeanUtils.copyProperties(setmealDTO,setmeal);
+        setmealMapper.update(setmeal);
+        Long setmealId = setmeal.getId();
+        List<SetmealDish> setmealDishes = setmealDTO.getSetmealDishes();
+        setmealDishMapper.delete(setmealId);
+        if(setmealDishes.size()>0  && setmealDishes != null){
+            setmealDishes.forEach(setmealDish -> {setmealDish.setSetmealId(setmealId);});
+            setmealDishMapper.insert(setmealDishes);
+        }
     }
 }
