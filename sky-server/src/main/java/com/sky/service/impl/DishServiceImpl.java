@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -77,11 +78,39 @@ public class DishServiceImpl implements DishService {
             throw new DeletionNotAllowedException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);
         }
         //可以删除了，一起删除口味数据
-        for (Long id : ids) {
-            dishMapper.deleteById(id);
-            dishFlavorMapper.deleteById(id);
+        dishMapper.deleteByIds(ids);
+        dishFlavorMapper.deleteByIds(ids);
+
+
+    }
+
+    @Override
+    public DishVO getById(Long id) {
+        Dish dish = dishMapper.getById(id);
+        List<DishFlavor> dishFlavors = dishFlavorMapper.getByDishId(id);
+        DishVO dishVO = new DishVO();
+        BeanUtils.copyProperties(dish, dishVO);
+        dishVO.setFlavors(dishFlavors);
+        return dishVO;
+    }
+    @Transactional
+    @Override
+    public void update(DishDTO dishDTO) {
+        Dish dish = new Dish();
+        BeanUtils.copyProperties(dishDTO, dish);
+        dishMapper.update(dish);
+        Long dishId = dishDTO.getId();
+        dishFlavorMapper.deleteByIds(Collections.singletonList(dishId));
+        List<DishFlavor> flavors = dishDTO.getFlavors();
+        if (flavors != null && flavors.size() > 0) {
+            flavors.forEach(flavor -> {flavor.setDishId(dishId);});
+            dishFlavorMapper.insert(flavors);
         }
+    }
 
-
+    @Override
+    public List<Dish> getByCategoryId(Long categoryId) {
+        List<Dish> list = dishMapper.getByCategoryId(categoryId);
+        return list;
     }
 }
