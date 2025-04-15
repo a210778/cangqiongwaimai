@@ -2,6 +2,7 @@ package com.sky.controller.admin;
 
 import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
+import com.sky.entity.Setmeal;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.SetmealService;
@@ -65,5 +66,13 @@ public class SetmealController {
     public Result delete(@RequestParam List<Long> ids) {
         setmealService.delete(ids);
         return Result.success();
+    }
+
+    @GetMapping("/list")
+    @ApiOperation("根据分类id查询菜品")
+    public Result<List<Setmeal>> list(Long categoryId) {
+    log.info("根据分类id查询菜品");
+    List<Setmeal> list=  setmealService.getByCategoryId(categoryId);
+    return Result.success(list);
     }
 }

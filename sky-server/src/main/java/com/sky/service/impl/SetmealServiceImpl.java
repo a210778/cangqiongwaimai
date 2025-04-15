@@ -96,4 +96,10 @@ public class SetmealServiceImpl implements SetmealService {
     setmealDishMapper.deleteByIds(ids);
 
     }
+
+    @Override
+    public List<Setmeal> getByCategoryId(Long categoryId) {
+        List<Setmeal> list =setmealMapper.getByCategoryId(categoryId);
+        return list;
+    }
 }
