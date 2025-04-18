@@ -46,4 +46,19 @@
         </where>
         order by create_time desc
     </select>
+    <select id="list" resultType="com.sky.entity.Dish">
+        SELECT *
+        FROM dish
+        <where>
+            <if test="categoryId != null">
+                AND category_id = #{categoryId}
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+        </where>
+    </select>
 </mapper>

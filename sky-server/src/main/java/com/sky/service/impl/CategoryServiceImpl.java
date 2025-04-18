@@ -85,4 +85,8 @@ public class CategoryServiceImpl implements CategoryService {
         List<Category> list = categoryMapper.list(type);
         return list;
     }
+
+
+
+
 }

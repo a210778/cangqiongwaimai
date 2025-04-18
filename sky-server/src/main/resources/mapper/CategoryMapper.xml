@@ -28,6 +28,11 @@
 
     </select>
     <select id="list" resultType="com.sky.entity.Category">
-        select *from category where type = #{type}
+        SELECT * FROM category
+        <where>
+            <if test="type != null">
+                AND type = #{type}
+            </if>
+        </where>
     </select>
 </mapper>
