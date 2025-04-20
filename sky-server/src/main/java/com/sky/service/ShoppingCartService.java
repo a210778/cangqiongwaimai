@@ -9,4 +9,8 @@ public interface ShoppingCartService {
     void add(ShoppingCartDTO shoppingCartDTO);
 
     List<ShoppingCart> getById();
+
+    void sub(ShoppingCartDTO shoppingCartDTO);
+
+    void clean();
 }

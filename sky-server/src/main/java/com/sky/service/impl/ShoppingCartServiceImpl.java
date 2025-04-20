@@ -51,10 +51,11 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                 shoppingCart.setImage(setmeal.getImage());
                 shoppingCart.setAmount(setmeal.getPrice());
             }
+            shoppingCart.setNumber(1);
+            shoppingCart.setCreateTime(LocalDateTime.now());
+            shoppingCartMapper.insert(shoppingCart);
         }
-        shoppingCart.setNumber(1);
-        shoppingCart.setCreateTime(LocalDateTime.now());
-        shoppingCartMapper.insert(shoppingCart);
+
 
 
     }
@@ -63,5 +64,27 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     public List<ShoppingCart> getById() {
         Long userId = BaseContext.getCurrentId();
         return shoppingCartMapper.getById(userId);
+    }
+
+    @Override
+    public void sub(ShoppingCartDTO shoppingCartDTO) {
+        ShoppingCart shoppingCart = new ShoppingCart();
+        BeanUtils.copyProperties(shoppingCartDTO, shoppingCart);
+        List<ShoppingCart> list = shoppingCartMapper.list(shoppingCart);
+        ShoppingCart shoppingCart1 = list.get(0);
+        if(shoppingCart1.getNumber()>1){
+            shoppingCart1.setNumber(shoppingCart1.getNumber()-1);
+            shoppingCartMapper.updateNumberById(shoppingCart1);
+        }
+        else {
+            shoppingCartMapper.sub(shoppingCartDTO);
+        }
+
+    }
+
+    @Override
+    public void clean() {
+        Long userId = BaseContext.getCurrentId();
+        shoppingCartMapper.clean(userId);
     }
 }
