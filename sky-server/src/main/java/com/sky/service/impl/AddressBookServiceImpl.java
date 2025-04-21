@@ -51,7 +51,7 @@ public class AddressBookServiceImpl implements AddressBookService {
     }
 
     @Override
-    public AddressBook getById(int id) {
+    public AddressBook getById(Long id) {
         AddressBook addressBook = addressBookMapper.getById(id);
         return addressBook;
     }

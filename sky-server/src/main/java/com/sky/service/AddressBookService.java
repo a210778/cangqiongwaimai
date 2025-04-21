@@ -17,7 +17,7 @@ public interface AddressBookService {
 
     void updateAddressBook(AddressBook addressBook);
 
-    AddressBook getById(int id);
+    AddressBook getById(Long id);
 
     void deleteAddressBookById(Integer id);
 }

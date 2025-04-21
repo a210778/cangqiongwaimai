@@ -61,7 +61,7 @@ public class AddressBookController {
     }
     @GetMapping("/{id}")
     @ApiOperation("根据id查询地址")
-    public Result<AddressBook> getAddressBookById(@PathVariable Integer id) {
+    public Result<AddressBook> getAddressBookById(@PathVariable Long id) {
         log.info("根据id查询地址");
         AddressBook addressBook = addressBookService.getById(id);
         return Result.success(addressBook);
