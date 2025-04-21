@@ -11,4 +11,6 @@ public interface UserMapper {
     User wechatLogin(String openid);
 
     void insert(User build);
+    @Select("select *from user where id =#{userId}")
+    User getById(Long userId);
 }

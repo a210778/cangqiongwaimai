@@ -13,16 +13,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
-public class OrderVO implements Serializable {
-
+public class OrderHistoryVO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Long id;
     private String number;
-    private Integer status;
+    private Long status;
     private Long userId;
     private Long addressBookId;
     private LocalDateTime orderTime;
@@ -41,10 +40,8 @@ public class OrderVO implements Serializable {
     private LocalDateTime estimatedDeliveryTime;
     private Integer deliveryStatus;
     private LocalDateTime deliveryTime;
-    private int packAmount;
+    private BigDecimal packAmount;
     private Integer tablewareNumber;
     private Integer tablewareStatus;
-
-    // 订单明细列表
     private List<OrderDetail> orderDetailList = new ArrayList<>();
 }
