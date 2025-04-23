@@ -3,12 +3,10 @@ package com.sky.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.sky.WebSocket.WebSocketServer;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
-import com.sky.dto.OrdersDTO;
-import com.sky.dto.OrdersPageQueryDTO;
-import com.sky.dto.OrdersPaymentDTO;
-import com.sky.dto.OrdersSubmitDTO;
+import com.sky.dto.*;
 import com.sky.entity.*;
 import com.sky.exception.AddressBookBusinessException;
 import com.sky.exception.OrderBusinessException;
@@ -20,6 +18,7 @@ import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.*;
 import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,6 +28,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -49,6 +49,8 @@ public class OrderServiceImpl implements OrderService {
     private UserMapper userMapper;
     @Autowired
     private WeChatPayUtil weChatPayUtil;
+    @Autowired
+    private WebSocketServer webSocketServer;
 
     @Override
     @Transactional
@@ -108,28 +110,49 @@ public class OrderServiceImpl implements OrderService {
      * @param ordersPaymentDTO
      * @return
      */
+//    public OrderPaymentVO payment(OrdersPaymentDTO ordersPaymentDTO) throws Exception {
+//        // 当前登录用户id
+//        Long userId = BaseContext.getCurrentId();
+//        User user = userMapper.getById(userId);
+//
+//        //调用微信支付接口，生成预支付交易单
+//        JSONObject jsonObject = weChatPayUtil.pay(
+//                ordersPaymentDTO.getOrderNumber(), //商户订单号
+//                new BigDecimal(0.01), //支付金额，单位 元
+//                "苍穹外卖订单", //商品描述
+//                user.getOpenid() //微信用户的openid
+//        );
+//
+//        if (jsonObject.getString("code") != null && jsonObject.getString("code").equals("ORDERPAID")) {
+//            throw new OrderBusinessException("该订单已支付");
+//        }
+//
+//        OrderPaymentVO vo = jsonObject.toJavaObject(OrderPaymentVO.class);
+//        vo.setPackageStr(jsonObject.getString("package"));
+//
+//        return vo;
+//    }
     public OrderPaymentVO payment(OrdersPaymentDTO ordersPaymentDTO) throws Exception {
         // 当前登录用户id
         Long userId = BaseContext.getCurrentId();
         User user = userMapper.getById(userId);
 
-        //调用微信支付接口，生成预支付交易单
-        JSONObject jsonObject = weChatPayUtil.pay(
-                ordersPaymentDTO.getOrderNumber(), //商户订单号
-                new BigDecimal(0.01), //支付金额，单位 元
-                "苍穹外卖订单", //商品描述
-                user.getOpenid() //微信用户的openid
-        );
+        // 模拟点击支付成功（不调用微信接口）
+        // 你可以这里做一些状态检查，比如判断订单是否已经支付等（可选）
 
-        if (jsonObject.getString("code") != null && jsonObject.getString("code").equals("ORDERPAID")) {
-            throw new OrderBusinessException("该订单已支付");
-        }
+        // 构造一个模拟的支付响应
+        OrderPaymentVO vo = new OrderPaymentVO();
+        vo.setNonceStr("模拟随机字符串");
+        vo.setTimeStamp(String.valueOf(System.currentTimeMillis() / 1000));
+        vo.setPackageStr("prepay_id=模拟预支付ID");
+        vo.setPaySign("模拟PaySign");
+        vo.setSignType("MD5");
 
-        OrderPaymentVO vo = jsonObject.toJavaObject(OrderPaymentVO.class);
-        vo.setPackageStr(jsonObject.getString("package"));
+        orderMapper.updateStatusByOrderNumber(ordersPaymentDTO.getOrderNumber(), Orders.REFUND);
 
         return vo;
     }
+
 
     /**
      * 支付成功，修改订单状态
@@ -137,7 +160,7 @@ public class OrderServiceImpl implements OrderService {
      * @param outTradeNo
      */
     public void paySuccess(String outTradeNo) {
-
+        System.out.println("lllalalalallalalallalal");
         // 根据订单号查询订单
         Orders ordersDB = orderMapper.getByNumber(outTradeNo);
 
@@ -150,6 +173,14 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(orders);
+        Map map = new HashMap();
+        map.put("type", 1);
+        map.put("orderId", ordersDB.getId());
+        map.put("content", "订单号:" + outTradeNo);
+
+        String json = JSONObject.toJSONString(map);
+        webSocketServer.sendToAllClient(json);
+
     }
 
     @Override
@@ -248,7 +279,11 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public PageResult adminPageQuery(OrdersPageQueryDTO ordersPageQueryDTO) {
         PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
-        Page<Orders> page = orderMapper.adminPageQuery(ordersPageQueryDTO);
+        Page<OrderVO> page = orderMapper.adminPageQuery(ordersPageQueryDTO);
+        for (OrderVO orderVO : page.getResult()) {
+            List<String> dishNames = orderMapper.getDishNamesByOrderId(orderVO.getId());
+            orderVO.setOrderDishes(String.join(", ", dishNames));
+        }
         return new PageResult(page.getTotal(), page.getResult());
     }
 
@@ -262,6 +297,62 @@ public class OrderServiceImpl implements OrderService {
         vo.setDeliveryInProgress(deliveryInProgress);
         vo.setToBeConfirmed(toBeConfirmed);
         return vo;
+    }
+
+    @Override
+    public void adminCancelOrder(OrdersCancelDTO ordersCancelDTO) {
+        Orders orders = orderMapper.getById(Math.toIntExact(ordersCancelDTO.getId()));
+        orders.setStatus(Orders.CANCELLED);
+        orders.setCancelTime(LocalDateTime.now());
+        orders.setCancelReason(ordersCancelDTO.getCancelReason());
+        orderMapper.update(orders);
+
+    }
+
+    @Override
+    public void confirm(OrdersConfirmDTO ordersConfirmDTO) {
+        Orders orders = orderMapper.getById(Math.toIntExact(ordersConfirmDTO.getId()));
+        orders.setStatus(Orders.CONFIRMED);
+        orderMapper.update(orders);
+    }
+
+    @Override
+    public void rejection(OrdersRejectionDTO ordersRejectionDTO) {
+        Orders orders = orderMapper.getById(Math.toIntExact(ordersRejectionDTO.getId()));
+        orders.setStatus(Orders.CANCELLED);
+        orders.setRejectionReason(ordersRejectionDTO.getRejectionReason());
+        orderMapper.update(orders);
+    }
+
+    @Override
+    public void delivery(Integer id) {
+        Orders orders = orderMapper.getById(id);
+        orders.setStatus(Orders.DELIVERY_IN_PROGRESS);
+        orderMapper.update(orders);
+    }
+
+    @Override
+    public void complete(Integer id) {
+        Orders orders = orderMapper.getById(id);
+        orders.setStatus(Orders.COMPLETED);
+        orderMapper.update(orders);
+
+    }
+
+    @Override
+    public void reminder(Long id) {
+        Orders orders = orderMapper.getById(Math.toIntExact(id));
+        if (orders==null)
+        {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+
+        }
+        Map map = new HashMap();
+        map.put("type", 2);
+        map.put("orderId", id);
+        map.put("content","用户催单");
+        String jsonString = JSONObject.toJSONString(map);
+        webSocketServer.sendToAllClient(jsonString);
     }
 
 }

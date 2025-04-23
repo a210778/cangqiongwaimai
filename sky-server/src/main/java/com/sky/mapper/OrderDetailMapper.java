@@ -12,4 +12,6 @@ public interface OrderDetailMapper {
     void insertBatch(List<OrderDetail> orderDetails);
 
     List<OrderDetail> getByOrderId(List<Long> orderIds);
+    @Select("SELECT *FROM order_detail WHERE order_id=#{id}")
+    List<OrderDetail> nameByOrderId(Long id);
 }

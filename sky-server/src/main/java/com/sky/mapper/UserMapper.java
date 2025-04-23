@@ -5,6 +5,8 @@ import com.sky.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.time.LocalDateTime;
+
 @Mapper
 public interface UserMapper {
     @Select("select *from user where openid = #{openid}")
@@ -13,4 +15,8 @@ public interface UserMapper {
     void insert(User build);
     @Select("select *from user where id =#{userId}")
     User getById(Long userId);
+    @Select("SELECT count(*) from user where create_time>#{startOfDay} and create_time<#{endOfDay}")
+    Long getByTime(LocalDateTime startOfDay,LocalDateTime endOfDay);
+    @Select("select count(*) from user where create_time<#{endOfDay}")
+    Long getByTimeTotal(LocalDateTime endOfDay);
 }

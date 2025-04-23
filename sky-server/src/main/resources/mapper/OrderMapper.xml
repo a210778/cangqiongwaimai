@@ -35,7 +35,7 @@
         </where>
         ORDER BY order_time DESC
     </select>
-    <select id="adminPageQuery" resultType="com.sky.entity.Orders">
+    <select id="adminPageQuery" resultType="com.sky.vo.OrderVO">
         SELECT * FROM orders
         <where>
             <if test="status != null">

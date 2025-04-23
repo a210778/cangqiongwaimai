@@ -46,11 +46,12 @@ public class OrderController {
      */
     @PutMapping("/payment")
     @ApiOperation("订单支付")
-    public Result<OrderPaymentVO> payment(@RequestBody OrdersPaymentDTO ordersPaymentDTO) throws Exception {
+    public Result payment(@RequestBody OrdersPaymentDTO ordersPaymentDTO) throws Exception {
         log.info("订单支付：{}", ordersPaymentDTO);
-        OrderPaymentVO orderPaymentVO = orderService.payment(ordersPaymentDTO);
-        log.info("生成预支付交易单：{}", orderPaymentVO);
-        return Result.success(orderPaymentVO);
+
+        orderService.paySuccess(ordersPaymentDTO.getOrderNumber());
+
+        return Result.success();
     }
     @GetMapping("/historyOrders")
     @ApiOperation("历史订单查询")
@@ -84,5 +85,15 @@ public class OrderController {
         orderService.repetition(id);
         return Result.success();
     }
+
+    @GetMapping("/reminder/{id}")
+    @ApiOperation("催单")
+    public Result reminder(@PathVariable Long id){
+        log.info("reminder:{}", id);
+        orderService.reminder(id);
+        return Result.success();
+    }
+
+
 
 }

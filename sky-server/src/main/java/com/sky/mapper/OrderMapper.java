@@ -4,8 +4,17 @@ import com.github.pagehelper.Page;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.entity.Orders;
 import com.sky.vo.OrderHistoryVO;
+import com.sky.vo.OrderVO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
+import org.aspectj.weaver.ast.Or;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Mapper
 public interface OrderMapper {
@@ -28,7 +37,23 @@ public interface OrderMapper {
     @Select("select *from orders where id=#{id}")
     Orders getById(Integer id);
 
-    Page<Orders> adminPageQuery(OrdersPageQueryDTO ordersPageQueryDTO);
-    @Select("select *from orders where status=#{i}")
+    Page<OrderVO> adminPageQuery(OrdersPageQueryDTO ordersPageQueryDTO);
+    @Select("select count(*) from orders where status=#{i}")
     Integer getStatus(int i);
+    @Select("SELECT name FROM order_detail WHERE order_id = #{orderId}")
+    List<String> getDishNamesByOrderId(Long orderId);
+    @Select("select *from orders where status=#{status} and order_time < #{time}")
+    List<Orders> getStatusAndTimeOutTL(Integer status, LocalDateTime time);
+
+    @Update("UPDATE orders SET status = #{status}, checkout_time = NOW() WHERE number = #{number}")
+    void updateStatusByOrderNumber(String number, Integer status);
+
+    @Select("SELECT IFNULL(SUM(amount), 0) FROM orders WHERE status = #{status} AND checkout_time >= #{begin} AND checkout_time < #{end}")
+    BigDecimal sumTurnover(@Param("begin") LocalDateTime begin, @Param("end") LocalDateTime end, @Param("status") Integer status);
+    @Select("SELECT COUNT(*) FROM orders WHERE order_time>#{startOfDay} and order_time<#{endOfDay}")
+    Long getByTime(LocalDateTime startOfDay, LocalDateTime endOfDay);
+    @Select("SELECT COUNT(*) FROM orders WHERE order_time>#{startOfDay} and order_time<#{endOfDay} and status= #{completed}")
+    Long getByTimeAndStatus(LocalDateTime startOfDay, LocalDateTime endOfDay, Integer completed);
+    @Select("SELECT * FROM orders WHERE order_time>#{startOfDay} and order_time<#{endOfDay} and status= #{completed}")
+    List<Orders> getByTimeAndStatusAndDish(LocalDate startOfDay, LocalDate endOfDay, Integer completed);
 }

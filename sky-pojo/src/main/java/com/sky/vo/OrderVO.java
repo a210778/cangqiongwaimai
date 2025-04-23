@@ -44,6 +44,7 @@ public class OrderVO implements Serializable {
     private int packAmount;
     private Integer tablewareNumber;
     private Integer tablewareStatus;
+    private String orderDishes;
 
     // 订单明细列表
     private List<OrderDetail> orderDetailList = new ArrayList<>();
