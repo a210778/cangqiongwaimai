@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface OrderMapper {
@@ -49,11 +50,15 @@ public interface OrderMapper {
     void updateStatusByOrderNumber(String number, Integer status);
 
     @Select("SELECT IFNULL(SUM(amount), 0) FROM orders WHERE status = #{status} AND checkout_time >= #{begin} AND checkout_time < #{end}")
-    BigDecimal sumTurnover(@Param("begin") LocalDateTime begin, @Param("end") LocalDateTime end, @Param("status") Integer status);
+    Double sumTurnover(@Param("begin") LocalDateTime begin, @Param("end") LocalDateTime end, @Param("status") Integer status);
     @Select("SELECT COUNT(*) FROM orders WHERE order_time>#{startOfDay} and order_time<#{endOfDay}")
     Long getByTime(LocalDateTime startOfDay, LocalDateTime endOfDay);
     @Select("SELECT COUNT(*) FROM orders WHERE order_time>#{startOfDay} and order_time<#{endOfDay} and status= #{completed}")
     Long getByTimeAndStatus(LocalDateTime startOfDay, LocalDateTime endOfDay, Integer completed);
     @Select("SELECT * FROM orders WHERE order_time>#{startOfDay} and order_time<#{endOfDay} and status= #{completed}")
     List<Orders> getByTimeAndStatusAndDish(LocalDate startOfDay, LocalDate endOfDay, Integer completed);
+
+    Integer countByMap(Map map);
+
+    Double sumByMap(Map map);
 }

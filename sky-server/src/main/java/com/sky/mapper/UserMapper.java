@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Mapper
 public interface UserMapper {
@@ -19,4 +20,6 @@ public interface UserMapper {
     Long getByTime(LocalDateTime startOfDay,LocalDateTime endOfDay);
     @Select("select count(*) from user where create_time<#{endOfDay}")
     Long getByTimeTotal(LocalDateTime endOfDay);
+
+    Integer countByMap(Map map);
 }

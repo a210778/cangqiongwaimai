@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -69,6 +70,14 @@ public class ReportController {
             // 抛出自定义异常或者返回失败的响应
             throw new RuntimeException("查询销量排名top10失败", e); // 你也可以自定义异常类
         }
+    }
+
+
+    @GetMapping("/export")
+    @ApiOperation("导出Excel报表接口")
+    public void export(HttpServletResponse response){
+        log.info("导出Excel报表接口");
+        reportService.exportBussionessData(response);
     }
 
 }
